@@ -1,1 +1,30 @@
-spring.application.name=budget
+spring:
+  application:
+  name: budget
+
+  profiles:
+    include:
+      - secret
+
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+
+    hibernate:
+      ddl-auto: update
+
+    defer-datasource-initialization: true # 스프링부트 2.5 이상부터 초기 sql 데이터 입력시 필요함
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  sql: # 모든 데이터베이스에 sql 스크립트를 동작시킴
+    init:
+      mode: always
+
+
+logging.level:
+  org.hibernate.SQL: debug
+  org.hibernate.type: trace # console에서 ? 값 보여줌
