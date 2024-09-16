@@ -267,3 +267,5 @@ gradle-app.setting
 # End of https://www.toptal.com/developers/gitignore/api/macos,intellij,windows,java,gradle
 
 src/main/resources/application-secret.yml
+# 로그 파일
+.logs/
