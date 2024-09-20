@@ -8,6 +8,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -21,6 +22,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(e.getErrorCode().getStatus())
                 .body(new ErrorResponse(e.getErrorCode(), e.getMessage()));
+    }
+
+    // @Valid(유효성 검증) 관련 예외 처리
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.error("handleMethodArgumentNotValidException throw MethodArgumentNotValidException: {}", e.getMessage(), e);
+        String errorMessage = e.getBindingResult().getFieldError().getDefaultMessage();
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(ErrorCode.INVALID_INPUT_VALUE, errorMessage));
     }
 
     // hibernate 관련 에러 처리
