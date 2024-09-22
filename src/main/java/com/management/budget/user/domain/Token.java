@@ -18,7 +18,7 @@ public class Token {
     @Column(nullable = false)
     private String refreshToken; // 리프레시 토큰
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY) // 사용자와 일대일 관계 설정
     @JoinColumn(name = "user_id", nullable = false)
     private User user; // 사용자
 
