@@ -14,7 +14,7 @@ import java.util.UUID;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, length = 36)
+    @Column(columnDefinition = "BINARY(16)", unique = true, nullable = false)
     private UUID userId; // 사용자 일렬번호
 
     @Column(unique = true, nullable = false)
