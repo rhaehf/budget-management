@@ -1,5 +1,7 @@
 package com.management.budget.user.controller;
 
+import com.management.budget.user.dto.LoginRequest;
+import com.management.budget.user.dto.LoginResponse;
 import com.management.budget.user.dto.SignUpRequest;
 import com.management.budget.user.dto.SignUpResponse;
 import com.management.budget.user.service.UserService;
@@ -23,5 +25,12 @@ public class UserController {
     public ResponseEntity<SignUpResponse> signUp(@Valid @RequestBody SignUpRequest request) {
         SignUpResponse response = userService.signUp(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // 사용자 로그인
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        LoginResponse response = userService.login(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

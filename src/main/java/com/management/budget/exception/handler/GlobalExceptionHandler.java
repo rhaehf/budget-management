@@ -3,6 +3,7 @@ package com.management.budget.exception.handler;
 import com.management.budget.exception.BaseException;
 import com.management.budget.exception.ErrorCode;
 import com.management.budget.exception.ErrorResponse;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -32,6 +33,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(ErrorCode.INVALID_INPUT_VALUE, errorMessage));
+    }
+
+    // JPA에서 엔티티를 못찾는 예외 처리
+    @ExceptionHandler(EntityNotFoundException.class)
+    protected ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException e) {
+        log.error("handleEntityNotFoundException throw EntityNotFoundException: {}", e.getMessage(), e);
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(ErrorCode.ENTITY_NOT_FOUND, e.getMessage()));
     }
 
     // hibernate 관련 에러 처리

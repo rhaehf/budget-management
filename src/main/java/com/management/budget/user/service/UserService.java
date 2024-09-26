@@ -1,16 +1,24 @@
 package com.management.budget.user.service;
 
+import com.management.budget.config.TokenProvider;
 import com.management.budget.exception.BadRequestException;
 import com.management.budget.exception.BaseException;
 import com.management.budget.exception.ErrorCode;
+import com.management.budget.user.domain.Token;
 import com.management.budget.user.domain.User;
+import com.management.budget.user.dto.LoginRequest;
+import com.management.budget.user.dto.LoginResponse;
 import com.management.budget.user.dto.SignUpRequest;
 import com.management.budget.user.dto.SignUpResponse;
+import com.management.budget.user.repository.TokenRepository;
 import com.management.budget.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,8 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final TokenRepository tokenRepository;
+    private final TokenProvider tokenProvider;
 
-    // 회원가입
+    // 사용자 회원가입
     public SignUpResponse signUp(SignUpRequest request) {
         // 1. 계정 중복 확인
         if (userRepository.findByAccount(request.account()).isPresent()) {
@@ -63,5 +73,34 @@ public class UserService {
         )) {
             throw new BadRequestException(ErrorCode.INVALID_PASSWORD, "비밀번호는 숫자, 문자, 특수문자 중 두 가지 이상을 포함해야 합니다.");
         }
+    }
+
+    // 사용자 로그인
+    public LoginResponse login(LoginRequest request) {
+        // 1. 계정으로 사용자 조회
+        User user = userRepository.findByAccount(request.account())
+                .orElseThrow(() -> new EntityNotFoundException("아이디가 존재하지 않습니다."));
+        // 2. 비밀번호 일치 확인
+        if (!passwordEncoder.matches(request.password(), user.getPassword()))
+            throw new BadRequestException(ErrorCode.INVALID_PASSWORD, "비밀번호가 일치하지 않습니다.");
+
+        // 3. refreshToken 이 있는지 확인
+        Optional<Token> existingRefreshToken = tokenRepository.findByUser_UserId(user.getUserId());
+        String newRefreshToken = tokenProvider.createRefreshToken();
+
+        if (existingRefreshToken.isPresent()) { // refreshToken 이 있는 경우
+            // 새로운 refreshToken 으로 업데이트
+            existingRefreshToken.get().updateRefreshToken(newRefreshToken);
+        } else {
+            // refreshToken 이 없으면 DB에 저장
+            tokenRepository.save(Token.builder()
+                    .refreshToken(newRefreshToken)
+                    .user(user)
+                    .build());
+        }
+
+        // 4. accessToken, refreshToken 반환
+        String accessToken = tokenProvider.createAccessToken(user);
+        return new LoginResponse(accessToken, newRefreshToken);
     }
 }
