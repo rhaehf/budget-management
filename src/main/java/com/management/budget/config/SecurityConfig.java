@@ -1,5 +1,6 @@
 package com.management.budget.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -9,11 +10,15 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity // 시큐리티 활성화
+@RequiredArgsConstructor
 public class SecurityConfig {
-    @Bean
+    private final TokenProvider tokenProvider;
+
+    @Bean // 비밀번호 암호화
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -28,7 +33,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/users/**").permitAll() // 어떤 사용자든 접근 가능
                         .anyRequest().authenticated())
-//                .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                // JWT 인증 필터를 Spring Security 필터 체인에 등록하여, 인증이 필요한 모든 요청에서 JWT 검증을 거치도록 설정
+                // TokenAuthenticationFilter 필터를 UsernamePasswordAuthenticationFilter 전에 실행하겠다는 설정
+                .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((request, response, exception) -> {
                             response.sendError(HttpStatus.UNAUTHORIZED.value(), "인증이 필요합니다.");
