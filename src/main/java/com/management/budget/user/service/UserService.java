@@ -2,7 +2,7 @@ package com.management.budget.user.service;
 
 import com.management.budget.config.TokenProvider;
 import com.management.budget.exception.BadRequestException;
-import com.management.budget.exception.BaseException;
+import com.management.budget.exception.ConflictException;
 import com.management.budget.exception.ErrorCode;
 import com.management.budget.user.domain.Token;
 import com.management.budget.user.domain.User;
@@ -33,7 +33,7 @@ public class UserService {
     public SignUpResponse signUp(SignUpRequest request) {
         // 1. 계정 중복 확인
         if (userRepository.findByAccount(request.account()).isPresent()) {
-            throw new BaseException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 아이디가 있습니다.");
+            throw new ConflictException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 아이디가 있습니다.");
         } else {
             // 2. 비밀번호 검사
             verifyPassword(request.password());
