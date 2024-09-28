@@ -1,6 +1,8 @@
 package com.management.budget.config;
 
 import com.management.budget.user.domain.User;
+import com.management.budget.exception.ErrorCode;
+import com.management.budget.exception.InvalidTokenException;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -86,13 +89,18 @@ public class TokenProvider {
     }
 
     // 토큰에서 userId 추출
-    public String getUserIdFromJWT(String token) {
+    public UUID getUserIdFromJWT(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey()) // 서명 키 설정
                 .build()
                 .parseClaimsJws(token) // 토큰의 서명 및 만료 시간 검증
                 .getBody(); // 페이로드를 가져옴
 
-        return claims.getSubject(); // subject에 저장된 userId 반환
+        String userId = claims.getSubject();
+        if (userId == null || userId.isEmpty()) {
+            throw new InvalidTokenException(ErrorCode.TOKEN_MISSING_USERID);
+        }
+
+        return UUID.fromString(userId); // userId를 UUID로 변환
     }
 }
