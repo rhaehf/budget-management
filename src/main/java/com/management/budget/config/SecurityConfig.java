@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션을 사용하지 않고, Stateless 서버로 설정
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/users/**").permitAll() // 어떤 사용자든 접근 가능
+                        .requestMatchers("/api/users/**", "/api/tokens/reissue").permitAll() // 어떤 사용자든 접근 가능
                         .anyRequest().authenticated())
                 // JWT 인증 필터를 Spring Security 필터 체인에 등록하여, 인증이 필요한 모든 요청에서 JWT 검증을 거치도록 설정
                 // TokenAuthenticationFilter 필터를 UsernamePasswordAuthenticationFilter 전에 실행하겠다는 설정
