@@ -57,6 +57,11 @@ public class TokenProvider {
 
     // 토큰 유효성 검증
     public boolean validateToken(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            log.info("JWT 토큰이 비어 있거나 null입니다.");
+            return false;
+        }
+
         try {
             // 토큰을 파싱하고 서명을 검증
             Jwts.parserBuilder()
@@ -75,6 +80,7 @@ public class TokenProvider {
             // 클라이언트가 만료된 JWT 토큰으로 요청을 보낼 때 발생
             // JWT에는 exp(만료 시간) 필드가 있으며, 이 시간을 초과한 경우 인증이 거부됨
             log.info("만료된 JWT 토큰입니다.");
+            throw new InvalidTokenException(ErrorCode.Token_Expired);
         } catch (UnsupportedJwtException e) {
             // 특정 형식의 JWT가 지원되지 않거나 애플리케이션이 기대하지 않는 형식의 JWT를 수신할 때 발생
             // 예를 들어, 특정 알고리즘을 지원하지 않는 경우에 이 예외가 발생
