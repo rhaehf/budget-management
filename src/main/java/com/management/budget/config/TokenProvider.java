@@ -1,6 +1,5 @@
 package com.management.budget.config;
 
-import com.management.budget.user.domain.User;
 import com.management.budget.exception.ErrorCode;
 import com.management.budget.exception.InvalidTokenException;
 import io.jsonwebtoken.*;
@@ -31,13 +30,13 @@ public class TokenProvider {
     }
 
     // accessToken 생성
-    public String createAccessToken(User user) {
+    public String createAccessToken(UUID userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessTokenValidTime);
 
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE) // 헤더 설정 ("typ": "JWT")
-                .setSubject(user.getUserId().toString()) // userId를 subject로 설정
+                .setSubject(userId.toString()) // userId를 subject로 설정
                 .setIssuedAt(now) // 발행 시간
                 .setExpiration(expiryDate) // 만료 시간
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512) // 서명 설정 ("alg": "HS512")
