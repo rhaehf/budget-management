@@ -23,7 +23,8 @@ public enum ErrorCode {
 
     // JWT 관련
     TOKEN_MISSING_USERID(HttpStatus.UNAUTHORIZED, "토큰에 userId가 포함되어 있지 않습니다."),
-    Token_Expired(HttpStatus.UNAUTHORIZED,"JWT 토큰이 만료되었습니다."),
+    Token_Expired(HttpStatus.UNAUTHORIZED, "JWT 토큰이 만료되었습니다."),
+    INVALID_REFRESHTOKEN(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 유효하지 않습니다."),
     ;
 
     private final HttpStatus status;
