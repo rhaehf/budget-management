@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final TokenProvider tokenProvider;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean // 비밀번호 암호화
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -35,11 +36,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 // JWT 인증 필터를 Spring Security 필터 체인에 등록하여, 인증이 필요한 모든 요청에서 JWT 검증을 거치도록 설정
                 // TokenAuthenticationFilter 필터를 UsernamePasswordAuthenticationFilter 전에 실행하겠다는 설정
-                .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new TokenAuthenticationFilter(tokenProvider, jwtAuthenticationEntryPoint), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(e -> e
-                        .authenticationEntryPoint((request, response, exception) -> {
-                            response.sendError(HttpStatus.UNAUTHORIZED.value(), "인증이 필요합니다.");
-                        })
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler((request, response, exception) -> {
                             response.sendError(HttpStatus.FORBIDDEN.value(), "접근권한이 없습니다.");
                         }));
