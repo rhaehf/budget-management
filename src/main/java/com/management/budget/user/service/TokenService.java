@@ -2,7 +2,7 @@ package com.management.budget.user.service;
 
 import com.management.budget.config.TokenProvider;
 import com.management.budget.exception.ErrorCode;
-import com.management.budget.exception.InvalidTokenException;
+import com.management.budget.exception.TokenException;
 import com.management.budget.user.domain.Token;
 import com.management.budget.user.dto.TokenRequest;
 import com.management.budget.user.dto.TokenResponse;
@@ -25,9 +25,7 @@ public class TokenService {
     // 만료된 AccessToken 과 유효한 RefreshToken 으로 테스트 해야함. 만료된 RefreshToken 을 보낼 경우 재발급이 불가능
     public TokenResponse reissueAccessToken(TokenRequest request) {
         // 1. refreshToken 만료 확인
-        if (!tokenProvider.validateToken(request.refreshToken())) {
-            throw new InvalidTokenException(ErrorCode.INVALID_REFRESHTOKEN);
-        }
+        tokenProvider.validateToken(request.refreshToken());
 
         // 2. request의 refreshToken 으로 DB에서 token 조회
         Token dBToken = tokenRepository.findByRefreshToken(request.refreshToken())

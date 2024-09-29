@@ -22,9 +22,14 @@ public enum ErrorCode {
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호 형식에 맞지 않습니다."),
 
     // JWT 관련
-    TOKEN_MISSING_USERID(HttpStatus.UNAUTHORIZED, "토큰에 userId가 포함되어 있지 않습니다."),
-    Token_Expired(HttpStatus.UNAUTHORIZED, "JWT 토큰이 만료되었습니다."),
-    INVALID_REFRESHTOKEN(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 유효하지 않습니다."),
+    UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
+    TOKEN_MISSING_USERID(HttpStatus.BAD_REQUEST, "토큰에 userId가 포함되어 있지 않습니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 유효하지 않습니다."),
+    INVALID_SIGNATURE(HttpStatus.UNAUTHORIZED, "JWT 토큰의 서명이 잘못되었습니다."),
+    MALFORMED_TOKEN(HttpStatus.BAD_REQUEST, "JWT 토큰의 구조가 잘못되었습니다."),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "JWT 토큰이 만료되었습니다."),
+    UNSUPPORTED_TOKEN(HttpStatus.BAD_REQUEST, "지원되지 않는 형식의 JWT 토큰입니다."),
+    TOKEN_ILLEGAL_ARGUMENT(HttpStatus.BAD_REQUEST, "JWT 토큰에 잘못된 값이 포함되었습니다."),
     ;
 
     private final HttpStatus status;
