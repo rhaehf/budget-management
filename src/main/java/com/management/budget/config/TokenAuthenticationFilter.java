@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 // 인증 없이 허용되는 경로를 제외한 모든 Request 요청은 이 필터를 거치기 때문에 토큰 정보가 없거나 유효하지 않으면 정상적으로 처리되지 않음
@@ -30,7 +31,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         // 2. JWT 유효성 검증
         if (token != null && tokenProvider.validateToken(token)) {
             // 3. JWT에서 userId 추출
-            String userId = tokenProvider.getUserIdFromJWT(token);
+            UUID userId = tokenProvider.getUserIdFromJWT(token);
 
             // 4. 추출된 userId로 인증 객체(UsernamePasswordAuthenticationToken) 생성
             UsernamePasswordAuthenticationToken authentication =

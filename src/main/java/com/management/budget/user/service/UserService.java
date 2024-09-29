@@ -100,7 +100,7 @@ public class UserService {
         }
 
         // 4. accessToken, refreshToken 반환
-        String accessToken = tokenProvider.createAccessToken(user);
+        String accessToken = tokenProvider.createAccessToken(user.getUserId());
         return new LoginResponse(accessToken, newRefreshToken);
     }
 }

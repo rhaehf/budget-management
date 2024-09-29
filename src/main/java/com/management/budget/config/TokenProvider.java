@@ -1,6 +1,7 @@
 package com.management.budget.config;
 
-import com.management.budget.user.domain.User;
+import com.management.budget.exception.ErrorCode;
+import com.management.budget.exception.InvalidTokenException;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +11,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -28,13 +30,13 @@ public class TokenProvider {
     }
 
     // accessToken 생성
-    public String createAccessToken(User user) {
+    public String createAccessToken(UUID userId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessTokenValidTime);
 
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE) // 헤더 설정 ("typ": "JWT")
-                .setSubject(user.getUserId().toString()) // userId를 subject로 설정
+                .setSubject(userId.toString()) // userId를 subject로 설정
                 .setIssuedAt(now) // 발행 시간
                 .setExpiration(expiryDate) // 만료 시간
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512) // 서명 설정 ("alg": "HS512")
@@ -55,6 +57,11 @@ public class TokenProvider {
 
     // 토큰 유효성 검증
     public boolean validateToken(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            log.info("JWT 토큰이 비어 있거나 null입니다.");
+            return false;
+        }
+
         try {
             // 토큰을 파싱하고 서명을 검증
             Jwts.parserBuilder()
@@ -73,6 +80,7 @@ public class TokenProvider {
             // 클라이언트가 만료된 JWT 토큰으로 요청을 보낼 때 발생
             // JWT에는 exp(만료 시간) 필드가 있으며, 이 시간을 초과한 경우 인증이 거부됨
             log.info("만료된 JWT 토큰입니다.");
+            throw new InvalidTokenException(ErrorCode.Token_Expired);
         } catch (UnsupportedJwtException e) {
             // 특정 형식의 JWT가 지원되지 않거나 애플리케이션이 기대하지 않는 형식의 JWT를 수신할 때 발생
             // 예를 들어, 특정 알고리즘을 지원하지 않는 경우에 이 예외가 발생
@@ -86,13 +94,18 @@ public class TokenProvider {
     }
 
     // 토큰에서 userId 추출
-    public String getUserIdFromJWT(String token) {
+    public UUID getUserIdFromJWT(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey()) // 서명 키 설정
                 .build()
                 .parseClaimsJws(token) // 토큰의 서명 및 만료 시간 검증
                 .getBody(); // 페이로드를 가져옴
 
-        return claims.getSubject(); // subject에 저장된 userId 반환
+        String userId = claims.getSubject();
+        if (userId == null || userId.isEmpty()) {
+            throw new InvalidTokenException(ErrorCode.TOKEN_MISSING_USERID);
+        }
+
+        return UUID.fromString(userId); // userId를 UUID로 변환
     }
 }

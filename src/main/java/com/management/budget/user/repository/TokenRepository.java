@@ -9,4 +9,7 @@ import java.util.UUID;
 public interface TokenRepository extends JpaRepository<Token, Long> {
     // userId로 Token 조회
     Optional<Token> findByUser_UserId(UUID userId);
+
+    // refreshToken으로 Token 조회
+    Optional<Token> findByRefreshToken(String refreshToken);
 }
